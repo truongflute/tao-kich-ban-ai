@@ -146,7 +146,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({
           <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent mb-2">
             Yêu cầu truy cập
           </h1>
-          <p className="text-brand-text-secondary">Vui lòng nhập key truy cập để sử dụng ứng dụng.</p>
+          <p className="text-brand-text-secondary">Vui lòng nhập key truy cập để sử dụng ứng dụng. LIỆN HỆ ADMIN: 0528-254-840</p>
         </div>
         <div>
           <label htmlFor="admin-key" className="sr-only">Access Key</label>
