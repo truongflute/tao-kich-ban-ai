@@ -136,6 +136,38 @@ const getStyleText = (style: Style): string => {
   }
 };
 
+const getStoryArcInstruction = (duration: Duration): string => {
+    if (duration === Duration.VeryShort) {
+        return `
+        1.  **Single, Focused Scene:** This is your core directive. For this very short video, you must create a single, impactful scene (around 8 seconds). This scene should capture a pivotal moment, a strong emotion, or a visually striking action. It should imply a larger story rather than telling a full one.
+            - **Focus on the Moment:** Do not try to fit a full Setup, Confrontation, and Resolution. Instead, focus on executing one of these perfectly. For example, the scene could be just the Confrontation (a character making a sudden discovery) or just the Resolution (the aftermath of an unseen event).
+            - **Visual Storytelling:** The scene must be rich in visual detail that hints at the before and after. If a character is looking at a map, the scene is about that moment of decision, not the entire journey.
+            - **Compelling Frame:** The scene must be a strong, memorable, and well-composed shot. It should feel like a key frame from a larger film.
+        `;
+    }
+    
+    if (duration === Duration.Short) {
+        return `
+        1.  **Condensed Story Arc:** This is your core directive. You are directing a short, continuous film sequence across two scenes (around 16 seconds total). The video must have a clear, condensed story arc.
+            - **Cause and Effect:** Every action in the first scene must be the direct cause of the second scene. The narrative chain must be unbreakable. Scene 1's end *triggers* Scene 2's start. For example, Scene 1 is the **Setup/Confrontation** (a character finds a mysterious key), and Scene 2 is the **Resolution** (they use the key on a lock, and we see their reaction to what's inside).
+            - **Continuity of State:** Meticulously track the physical and emotional state of all characters and objects between the two scenes.
+            - **Emotional Continuity:** A character's emotion in Scene 2 must be a direct, logical evolution of their emotion in Scene 1.
+            - **Seamless Cinematic Transitions:** Explicitly link the two scenes with directorial language like "The camera follows their hand as they insert the key, transitioning us into the next scene...".
+            - **Compelling Opening & Closing:** The first scene must establish the situation. The final scene must provide a clear outcome or a memorable final frame.
+        `;
+    }
+
+    // For Medium, Long, VeryLong, Epic
+    return `
+        1.  **Micro-Story Arc & Narrative Chain:** This is your core directive. You are directing a single, continuous film sequence. The video must have a complete story arc: a **Setup** (introducing the character/situation), a **Confrontation** (an action, discovery, or challenge), and a **Resolution** (the outcome or new state).
+            - **Cause and Effect:** Every action in a scene must be a direct result of the previous scene and the direct cause of the next. The narrative chain must be unbreakable. Scene 1's end *triggers* Scene 2's start.
+            - **Continuity of State:** Meticulously track the physical and emotional state of all characters and objects. If a character is holding a dripping umbrella in Scene 1, they MUST still be holding it at the start of Scene 2, and the ground around them should be wet.
+            - **Emotional Continuity:** A character's emotion in Scene 2 must be a direct, logical evolution of their emotion in Scene 1. If they were startled, they might now be cautiously investigating. Describe this emotional progression.
+            - **Seamless Cinematic Transitions:** Explicitly link scenes with directorial language. Do not just start a new scene. Use phrases like: "A match cut transitions from the burning match to the rising sun...", or "The camera follows her gaze, whip panning to reveal...", or "A slow dissolve merges the reflection in the puddle with the starry night sky...".
+            - **Compelling Opening & Closing:** The first scene must be a strong **establishing shot** that hooks the viewer. The final scene must provide a sense of closure or a memorable **final frame**.
+    `;
+}
+
 
 export const generateVeoPrompt = async (idea: string, duration: Duration, style: Style, language: Language, voice: Voice): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -143,32 +175,28 @@ export const generateVeoPrompt = async (idea: string, duration: Duration, style:
   const styleText = getStyleText(style);
   const languageInfo = getLanguageText(language);
   const voiceText = getVoiceText(voice, languageInfo.name);
+  const storyArcInstruction = getStoryArcInstruction(duration);
 
   const systemInstruction = `
     You are an award-winning screenwriter and a visionary film director, expert in crafting prompts for Google's Veo video model.
     Your mission is to elevate a user's simple idea into a masterpiece of micro-storytelling. The prompt must be cinematic, emotionally resonant, and flawlessly coherent for Veo to generate a high-quality, continuous video. Character and narrative consistency are paramount.
 
     Adhere to these directives with absolute precision:
-    1.  **Micro-Story Arc & Narrative Chain:** This is your core directive. You are directing a single, continuous film sequence. Every video, regardless of length, must have a complete story arc: a **Setup** (introducing the character/situation), a **Confrontation** (an action, discovery, or challenge), and a **Resolution** (the outcome or new state).
-        - **Cause and Effect:** Every action in a scene must be a direct result of the previous scene and the direct cause of the next. The narrative chain must be unbreakable. Scene 1's end *triggers* Scene 2's start.
-        - **Continuity of State:** Meticulously track the physical and emotional state of all characters and objects. If a character is holding a dripping umbrella in Scene 1, they MUST still be holding it at the start of Scene 2, and the ground around them should be wet.
-        - **Emotional Continuity:** A character's emotion in Scene 2 must be a direct, logical evolution of their emotion in Scene 1. If they were startled, they might now be cautiously investigating. Describe this emotional progression.
-        - **Seamless Cinematic Transitions:** Explicitly link scenes with directorial language. Do not just start a new scene. Use phrases like: "A match cut transitions from the burning match to the rising sun...", or "The camera follows her gaze, whip panning to reveal...", or "A slow dissolve merges the reflection in the puddle with the starry night sky...".
-        - **Compelling Opening & Closing:** The first scene must be a strong **establishing shot** that hooks the viewer. The final scene must provide a sense of closure or a memorable **final frame**.
+    ${storyArcInstruction}
     2.  **Absolute Character Consistency:** This is non-negotiable.
         - **Master Blueprint:** Begin with a detailed "**Consistent Character:**" section. This is the definitive guide. Describe their face, eyes, hair, build, every item of clothing, and unique accessories or marks.
-        - **Mandatory Reiteration:** In **every single scene**, you MUST explicitly reference the character's consistent appearance. For example: "The character, their described faded denim jacket now damp from the rain, clutches the silver locket...". This is mandatory.
+        - **Mandatory Reiteration:** In **every single scene**, you MUST explicitly reference the character's consistent appearance. For example: "The character, their described faded denim jacket now damp from the rain, clutches the silver locket...". This is mandatory. For very short (single scene) videos, this reiteration should still be present to firmly establish the character's look.
     3.  **Voice Profile:** ${voiceText}
     4.  **Language and Dialogue:** ${languageInfo.instruction} Dialogue must be purposeful and perfectly synchronized with the action and emotion. It must reveal character or advance the plot. The dialogue in one scene must be a logical continuation of the previous scene's context. Weave it into the action: 'The character shoves the map into their pocket. (in ${languageInfo.name}) "There's no turning back," they mutter, their voice a mix of fear and determination, a direct result of the discovery in the prior scene.'
     5.  **Subtitles:** The video MUST NOT have subtitles. State this clearly: "The video has no subtitles."
-    6.  **Duration:** The video's length must match the user's request. Include a statement like "Video duration: ${durationText}."
+    6.  **Duration:** The video's length must match the user's request. Include a statement like "Video duration: ${durationText}." This is a strict requirement. The number of scenes must align with this duration.
     7.  **Visual Style & Post-Production:** The prompt MUST explicitly define and adhere to the visual style: "${styleText}". This style dictates everything. Suggest post-production effects that fit, for example: "The entire video has a desaturated, blue-tinted color grade and a subtle film grain to enhance the noir atmosphere."
     8.  **Masterful Cinematography & Sensory Detail:**
         -   **Show, Don't Tell:** Instead of "she is scared," describe "her eyes widen, her breath catches in her throat, and her hand trembles as she reaches for the doorknob."
         -   **Intentional Cinematography:** Use specific, purposeful camera language (e.g., 'dolly zoom to heighten tension', 'rack focus to shift attention from the foreground to a new discovery in the background', 'a low-angle shot to make the character seem powerful', 'Dutch angle for unease', 'J-cut for a smooth audio transition').
         -   **Living Environments:** Describe weather, lighting with intent ('soft, diffused morning light streaming through a window,' 'the cold, sterile glow of neon signs reflecting on wet pavement'), and how the environment affects the character.
         -   **Immersive Sound Design:** Describe the full audio landscape: ambient sounds (a distant train whistle), foley (the crunch of gravel underfoot), and how sound shapes the mood.
-    9.  **Structure:** Break down the prompt into clear scenes (e.g., Scene 1, Scene 2), each about 8 seconds long. Each scene description must be a dense paragraph filled with the details above.
+    9.  **Structure:** Break down the prompt into clear scenes (e.g., Scene 1, Scene 2), each about 8 seconds long. The number of scenes MUST match what is specified in the duration rule (e.g., "very short" should ONLY have 1 scene, "short" should have 2 scenes). Each scene description must be a dense paragraph filled with the details above.
     10. **Output Format:** The final output should ONLY be the generated prompt. No extra text, greetings, or explanations.
 
     The user's idea is in Vietnamese. Your output prompt must be in English, but respect the ${languageInfo.name} language requirement for the character's speech.
